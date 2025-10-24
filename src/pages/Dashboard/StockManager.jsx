@@ -1,34 +1,49 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
-  selectAllProducts,
-  selectStats,
-  selectLowStockProducts,
-  selectOutOfStockProducts,
-  selectCategoryStats,
   addStock,
   removeStock,
-  recordSale
+  recordSale,
 } from "../../features/products/productsSlice";
 
 export default function StockManager() {
   const dispatch = useDispatch();
-  const products = useSelector(selectAllProducts) || [];
-  const stats = useSelector(selectStats) || {
-    totalStock: 0,
-    totalSold: 0,
-    totalValue: 0,
-    totalRevenue: 0,
-    lowStockCount: 0
-  };
-  const lowStockProducts = useSelector(selectLowStockProducts) || [];
-  const outOfStockProducts = useSelector(selectOutOfStockProducts) || [];
-  const categoryStats = useSelector(selectCategoryStats) || [];
-
+  
+  // Récupération depuis le state Redux
+  const { products, stats } = useSelector(state => state.products);
+  
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [quantity, setQuantity] = useState(0);
   const [operation, setOperation] = useState("add");
   const [filter, setFilter] = useState("all");
+
+  // Calcul des produits avec stock faible et en rupture
+  const lowStockProducts = products.filter(p => 
+    (p.stockQuantity || 0) <= (p.minStockAlert || 10) && (p.stockQuantity || 0) > 0
+  );
+  
+  const outOfStockProducts = products.filter(p => (p.stockQuantity || 0) === 0);
+
+  // Calcul des stats par catégorie
+  const categoryStats = React.useMemo(() => {
+    const categories = {};
+    products.forEach(product => {
+      if (!categories[product.category]) {
+        categories[product.category] = {
+          category: product.category,
+          totalStock: 0,
+          totalSold: 0,
+          totalValue: 0,
+          productCount: 0
+        };
+      }
+      categories[product.category].totalStock += product.stockQuantity || 0;
+      categories[product.category].totalSold += product.soldQuantity || 0;
+      categories[product.category].totalValue += (product.stockQuantity || 0) * (product.price || 0);
+      categories[product.category].productCount++;
+    });
+    return Object.values(categories);
+  }, [products]);
 
   // Filtrer les produits selon le filtre sélectionné
   const filteredProducts = filter === "all" 
@@ -61,36 +76,40 @@ export default function StockManager() {
 
   // Obtenir le statut du stock
   const getStockStatus = (product) => {
-    if (product.stockQuantity === 0) return { text: "Rupture", color: "bg-red-100 text-red-800" };
-    if (product.stockQuantity <= product.minStockAlert) return { text: "Faible", color: "bg-orange-100 text-orange-800" };
+    const stock = product.stockQuantity || 0;
+    const alert = product.minStockAlert || 10;
+    
+    if (stock === 0) return { text: "Rupture", color: "bg-red-100 text-red-800" };
+    if (stock <= alert) return { text: "Faible", color: "bg-orange-100 text-orange-800" };
     return { text: "Normal", color: "bg-green-100 text-green-800" };
   };
 
   return (
     <div className="space-y-6">
       {/* STATISTIQUES GLOBALES */}
+     
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
           <h3 className="text-sm font-medium text-blue-800 mb-1">Stock Total</h3>
-          <p className="text-2xl font-bold text-blue-900">{stats.totalStock}</p>
+          <p className="text-2xl font-bold text-blue-900">{stats?.totalStock || 0}</p>
           <p className="text-xs text-blue-600">unités</p>
         </div>
         
         <div className="bg-green-50 p-4 rounded-lg border border-green-200">
           <h3 className="text-sm font-medium text-green-800 mb-1">Ventes Totales</h3>
-          <p className="text-2xl font-bold text-green-900">{stats.totalSold}</p>
+          <p className="text-2xl font-bold text-green-900">{stats?.totalSold || 0}</p>
           <p className="text-xs text-green-600">unités vendues</p>
         </div>
         
         <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
           <h3 className="text-sm font-medium text-purple-800 mb-1">Valeur du Stock</h3>
-          <p className="text-2xl font-bold text-purple-900">{stats.totalValue.toLocaleString('fr-FR')}€</p>
+          <p className="text-2xl font-bold text-purple-900">{(stats?.totalValue || 0).toLocaleString('fr-FR')}€</p>
           <p className="text-xs text-purple-600">inventaire</p>
         </div>
         
         <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
           <h3 className="text-sm font-medium text-orange-800 mb-1">Chiffre d'Affaires</h3>
-          <p className="text-2xl font-bold text-orange-900">{stats.totalRevenue.toLocaleString('fr-FR')}€</p>
+          <p className="text-2xl font-bold text-orange-900">{(stats?.totalRevenue || 0).toLocaleString('fr-FR')}€</p>
           <p className="text-xs text-orange-600">revenus générés</p>
         </div>
       </div>
@@ -128,10 +147,10 @@ export default function StockManager() {
               {categoryStats.map((cat, idx) => (
                 <tr key={idx} className="border-t">
                   <td className="p-2 font-medium">{cat.category}</td>
-                  <td className="text-right p-2">{cat.productCount}</td>
-                  <td className="text-right p-2">{cat.totalStock}</td>
-                  <td className="text-right p-2">{cat.totalSold}</td>
-                  <td className="text-right p-2">{cat.totalValue.toLocaleString('fr-FR')}€</td>
+                  <td className="text-right p-2">{cat.productCount || 0}</td>
+                  <td className="text-right p-2">{cat.totalStock || 0}</td>
+                  <td className="text-right p-2">{cat.totalSold || 0}</td>
+                  <td className="text-right p-2">{(cat.totalValue || 0).toLocaleString('fr-FR')}€</td>
                 </tr>
               ))}
             </tbody>
@@ -151,7 +170,7 @@ export default function StockManager() {
             <option value="">Sélectionner un produit</option>
             {products.map(p => (
               <option key={p.id} value={p.id}>
-                {p.name} (Stock: {p.stockQuantity})
+                {p.name} (Stock: {p.stockQuantity || 0})
               </option>
             ))}
           </select>
@@ -227,20 +246,21 @@ export default function StockManager() {
             <tbody>
               {filteredProducts.map((product) => {
                 const status = getStockStatus(product);
+                const stockValue = (product.stockQuantity || 0) * (product.price || 0);
                 return (
                   <tr key={product.id} className="border-t hover:bg-gray-50">
                     <td className="p-2 font-medium">{product.name}</td>
                     <td className="p-2 text-gray-600">{product.category}</td>
-                    <td className="text-right p-2">{product.price}€</td>
-                    <td className="text-right p-2 font-semibold">{product.stockQuantity}</td>
-                    <td className="text-right p-2 text-green-700">{product.soldQuantity}</td>
+                    <td className="text-right p-2">{product.price || 0}€</td>
+                    <td className="text-right p-2 font-semibold">{product.stockQuantity || 0}</td>
+                    <td className="text-right p-2 text-green-700">{product.soldQuantity || 0}</td>
                     <td className="text-center p-2">
                       <span className={`px-2 py-1 rounded text-xs font-medium ${status.color}`}>
                         {status.text}
                       </span>
                     </td>
                     <td className="text-right p-2 font-medium">
-                      {(product.stockQuantity * product.price).toLocaleString('fr-FR')}€
+                      {stockValue.toLocaleString('fr-FR')}€
                     </td>
                   </tr>
                 );
