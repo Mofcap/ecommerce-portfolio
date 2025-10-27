@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import StockPieChart from "../../components/StockPieChart";
 import {
   addStock,
   removeStock,
@@ -87,7 +88,7 @@ export default function StockManager() {
   return (
     <div className="space-y-6">
       {/* STATISTIQUES GLOBALES */}
-     
+     <StockPieChart/>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
           <h3 className="text-sm font-medium text-blue-800 mb-1">Stock Total</h3>

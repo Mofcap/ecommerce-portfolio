@@ -18,7 +18,7 @@ export default function Home() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
       <aside className="md:col-span-1 space-y-4">
-        <CategoryMenu />
+        
         <div className="bg-white/50 p-4 rounded shadow">
           <h3 className="font-semibold mb-2">Recherche</h3>
           <form onSubmit={handleSearch} className="flex gap-1 w-full">
@@ -33,9 +33,11 @@ export default function Home() {
   </button>
 </form>
         </div>
+        <CategoryMenu />
       </aside>
 
       <section className="md:col-span-3">
+        
         <h1 className="text-2xl font-bold mb-4">Nos Produits</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map(p => <ProductCard key={p.id} product={p} />)}
