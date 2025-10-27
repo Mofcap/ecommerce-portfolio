@@ -2,7 +2,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { addToCart } from "../features/cart/cartSlice";
-
+import ProductImageSlider from "../components/ProductImageSlider";
 export default function ProductDetails() {
   const { id } = useParams();
   const product = useSelector(state => state.products.products.find(p => String(p.id) === id));
@@ -13,7 +13,7 @@ export default function ProductDetails() {
   return (
     <div className="bg-white p-6 rounded shadow max-w-4xl mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-gray-100 h-64 flex items-center justify-center rounded">Image</div>
+        <ProductImageSlider images={product.images} />
         <div>
           <h1 className="text-3xl font-bold">{product.name}</h1>
           <p className="text-gray-500">{product.category} {product.subcategory ? `— ${product.subcategory}` : ""}</p>

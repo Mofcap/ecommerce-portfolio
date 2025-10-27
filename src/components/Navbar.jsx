@@ -11,9 +11,13 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    // Supprimer tout le localStorage
+    localStorage.clear();
+    
+   
     dispatch(logout());
     navigate("/");
-  };
+};
 
   return (
     <nav className="bg-white/50 shadow">

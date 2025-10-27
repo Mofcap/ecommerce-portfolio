@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from "react-redux";
 import ProductCard from "../components/ProductCard";
 import CategoryMenu from "../components/CategoryMenu";
 import { searchProducts, resetFilter } from "../features/products/productsSlice";
-
 export default function Home() {
   const { filtered } = useSelector(state => state.products);
   const dispatch = useDispatch();
@@ -35,7 +34,6 @@ export default function Home() {
         </div>
         <CategoryMenu />
       </aside>
-
       <section className="md:col-span-3">
         
         <h1 className="text-2xl font-bold mb-4">Nos Produits</h1>

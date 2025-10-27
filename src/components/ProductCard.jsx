@@ -2,13 +2,13 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../features/cart/cartSlice";
-
+import ProductImageSlider from "./ProductImageSlider";
 export default function ProductCard({ product }) {
   const dispatch = useDispatch();
 
   return (
     <div className="bg-white/50 border rounded-lg p-4 shadow hover:shadow-md transition">
-      <div className="h-40 bg-gray-100 rounded mb-3 flex items-center justify-center">Image</div>
+      <ProductImageSlider images={product.images} />
       <Link to={`/product/${product.id}`}>
         <h3 className="text-lg font-semibold">{product.name}</h3>
       </Link>
