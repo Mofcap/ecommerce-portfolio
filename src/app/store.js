@@ -4,6 +4,7 @@ import cartReducer from "../features/cart/cartSlice";
 import productsReducer from "../features/products/productsSlice";
 import categoriesReducer from "../features/categories/categoriesSlice";
 import adminReducer from "../features/admin/adminSlice";
+import orderReducer from "../features/orders/ordersSlice"
 
 /* Simple persistence to localStorage */
 const LOCAL_KEY = "ecom_state_v1";
@@ -28,6 +29,7 @@ export const store = configureStore({
     products: productsReducer,
     categories: categoriesReducer,
     admin: adminReducer,
+    order: orderReducer,
   },
   preloadedState,
 });
@@ -40,6 +42,7 @@ store.subscribe(() => {
       cart: state.cart,
       products: state.products,
       categories: state.categories,
+      order: state.order,
     };
     localStorage.setItem(LOCAL_KEY, JSON.stringify(toSave));
   } catch (e) {
