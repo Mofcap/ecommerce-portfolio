@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import ProductCard from "../components/ProductCard";
 import CategoryMenu from "../components/CategoryMenu";
 import { searchProducts, resetFilter } from "../features/products/productsSlice";
+import Promo from "../components/Publicite";
 export default function Home() {
   const { filtered } = useSelector(state => state.products);
   const dispatch = useDispatch();
@@ -35,7 +36,7 @@ export default function Home() {
         <CategoryMenu />
       </aside>
       <section className="md:col-span-3">
-        
+        <Promo />
         <h1 className="text-2xl font-bold mb-4">Nos Produits</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map(p => <ProductCard key={p.id} product={p} />)}
